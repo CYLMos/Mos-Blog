@@ -1,6 +1,6 @@
 ---
 title: Dragalia Lost - サンダルフォン
-date: 2022-02-23 20:14:21
+date: 2021-10-24 13:32:00
 tags:
     - Dragalia Lost
     - Drawing

@@ -1,6 +1,6 @@
 ---
 title: Gura
-date: 2022-02-22 23:31:35
+date: 2020-11-08 08:37:39
 tags: 
 - Gura 
 - HololiveEN 
