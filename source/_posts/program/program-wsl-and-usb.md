@@ -47,11 +47,11 @@ sudo apt-get install xterm
 
 # 安裝VcXsvr
 該程式能夠讓我們在Windows中開啟Linux的GUI應用程式
-首先到該[網頁](https://sourceforge.net/projects/vcxsrv/ "網頁")下載並安
+首先到該[網頁](https://sourceforge.net/projects/vcxsrv/ "網頁")下載並安裝
 
 另外，聽說Windows 11不需要安裝該軟體，但我不確定
 
-安裝完成後，可以找找一個較XLaunch的程式，並將其開啟
+安裝完成後，可以找找一個叫XLaunch的程式，並將其開啟
 ![搜尋XLaunch](https://i.imgur.com/RR3VRPP.png)
 
 之後依照下面的圖片設定Xlaunch
@@ -272,7 +272,7 @@ Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub
 dmesg | grep tty
 ```
 
-### 後記
+# 後記
 由於工作上需要用.Net 6開發Linux的GUI應用程式和操控硬體，所以才會寫本篇做記錄
 
 目前正在研究有沒有辦法透過使用Vendor ID或Device ID來取得對應的Port，如果有結果的話會再更新
