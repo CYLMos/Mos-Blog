@@ -276,3 +276,44 @@ dmesg | grep tty
 由於工作上需要用.Net 6開發Linux的GUI應用程式和操控硬體，所以才會寫本篇做記錄
 
 目前正在研究有沒有辦法透過使用Vendor ID或Device ID來取得對應的Port，如果有結果的話會再更新
+
+
+------------
+
+2022/05/31更新
+下面的Code主要是透過下Command的方式，透過Vendor Id和Product Id來取得對應的Device
+```
+using System.IO.Ports;
+
+var devices = SerialPort.GetPortNames();
+var udevParam = "{comport}";
+var udevCommand = $"udevadm info --attribute-walk {udevParam} | grep -e idVendor -e idProduct";
+
+var vid = "Your VId"
+var pid = "Your PId"
+
+foreach (var device in devices)
+{
+    string result = string.Empty;
+    using (var proc = new Process())
+    {
+        proc.StartInfo.FileName = "/bin/bash";
+        proc.StartInfo.Arguments = "-c \" " + udevCommand.Replace(udevParam, device) + " \"";
+        proc.StartInfo.UseShellExecute = false;
+        proc.StartInfo.RedirectStandardOutput = true;
+        proc.StartInfo.RedirectStandardError = true;
+        proc.Start();
+
+        result = proc.StandardOutput.ReadToEnd();
+        proc.WaitForExit();
+    }
+
+    var vendorIdResult = result.Contains(vid);
+    var productIdResult = result.Contains(pid);
+
+    if (vendorIdResult && productIdResult)
+        return comport;
+}
+
+return "Not found";
+```
