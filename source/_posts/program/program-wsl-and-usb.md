@@ -286,7 +286,7 @@ dmesg | grep tty
 using System.IO.Ports;
 
 var devices = SerialPort.GetPortNames();
-var udevParam = "{comport}";
+var udevParam = "{device}";
 var udevCommand = $"udevadm info --attribute-walk {udevParam} | grep -e idVendor -e idProduct";
 
 var vid = "Your VId"
