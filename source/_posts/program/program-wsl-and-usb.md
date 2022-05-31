@@ -312,7 +312,7 @@ foreach (var device in devices)
     var productIdResult = result.Contains(pid);
 
     if (vendorIdResult && productIdResult)
-        return comport;
+        return device;
 }
 
 return "Not found";
