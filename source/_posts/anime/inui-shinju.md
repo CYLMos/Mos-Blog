@@ -6,7 +6,8 @@ tags:
     - 戀上換裝娃娃
     - Drawing
 categories: 繪圖
-thumbnail: https://imgur.com/Q0Otp7h.jpg
+top_img: https://imgur.com/Q0Otp7h.jpg
+cover: https://imgur.com/Q0Otp7h.jpg
 ---
 ![心壽](https://imgur.com/Q0Otp7h.jpg)
 
