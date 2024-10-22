@@ -582,12 +582,12 @@ share:
   # Share.js
   # https://github.com/overtrue/share.js
   sharejs:
-    sites: facebook,twitter,wechat,weibo,qq
+    sites: facebook,twitter,linkedin
 
   # AddToAny
   # https://www.addtoany.com/
   addtoany:
-    item: facebook,twitter,wechat,sina_weibo,facebook_messenger,email,copy_link
+    item:
 
 # --------------------------------------
 # 評論系統
@@ -598,7 +598,7 @@ comments:
   # 如果不需要評論功能，保持為空
   # 選擇：Disqus/Disqusjs/Livere/Gitalk/Valine/Waline/Utterances/Facebook Comments/Twikoo/Giscus/Remark42/Artalk
   # 兩個評論系統的格式：Disqus,Waline
-  use:
+  use: Disqus
   # 按鈕旁邊顯示評論系統名稱
   text: true
   # 懶加載：評論系統將在評論元素進入瀏覽器視口時加載
@@ -613,7 +613,7 @@ comments:
 # 官方文檔：https://disqus.com/
 disqus:
   # Disqus 的 shortname
-  shortname:
+  shortname: https-cylmos-github-io-mos-app
   # 最新評論小部件的 API 密鑰
   apikey:
 
