@@ -8,7 +8,8 @@ tags:
     - USTAR
     - Tar
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 這是學校OOP的作業2
 要求是能正確讀出tar檔案格式的內容並將其內容顯示出來

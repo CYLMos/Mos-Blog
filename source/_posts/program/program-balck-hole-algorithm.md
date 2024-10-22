@@ -6,7 +6,8 @@ tags:
     - Java
     - Black Hole Algorithm
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 實驗室大咪要報的演算法
 

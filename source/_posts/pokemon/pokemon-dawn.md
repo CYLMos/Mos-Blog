@@ -6,7 +6,8 @@ tags:
     - Pokemon
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/bP0Efhu.jpg
+top_img: https://i.imgur.com/bP0Efhu.jpg
+cover: https://i.imgur.com/bP0Efhu.jpg
 ---
 ![小光](https://i.imgur.com/bP0Efhu.jpg)
 

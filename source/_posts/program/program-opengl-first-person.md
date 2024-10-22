@@ -6,7 +6,8 @@ tags:
     - C++
     - OpenGL
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 大致上把Nehe前10課的openGL教學做過了(某些跳過，還有些偷懶只做基本款而已)
 

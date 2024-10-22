@@ -7,7 +7,8 @@ tags:
     - Worker Service
     - .Net
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 工作比較閒的時候寫的，沒寫過所以拿來當個練習
 

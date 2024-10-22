@@ -5,7 +5,8 @@ tags:
     - Dragalia Lost
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/h7C71vK.png
+top_img: https://i.imgur.com/h7C71vK.png
+cover: https://i.imgur.com/h7C71vK.png
 ---
 ![サンダルフォン](https://i.imgur.com/h7C71vK.png)
 

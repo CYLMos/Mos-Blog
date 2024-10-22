@@ -6,7 +6,8 @@ tags:
     - Java
     - FP Growth
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 這兩天用Java寫了一個FP Growth
 

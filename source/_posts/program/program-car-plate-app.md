@@ -9,7 +9,8 @@ tags:
     - KNN
     - Tess-Two
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 OS期末專案做的車牌辨識app
 使用OpenCV 3.2以及tess-two

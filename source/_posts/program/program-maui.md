@@ -8,7 +8,8 @@ tags:
     - Visual Studio 2022
     - .Net 6
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 記錄
 

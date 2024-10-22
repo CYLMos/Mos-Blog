@@ -6,7 +6,8 @@ tags:
 - HololiveEN 
 - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/etU9GtN.jpg
+top_img: https://i.imgur.com/etU9GtN.jpg
+cover: https://i.imgur.com/etU9GtN.jpg
 ---
 ![Gura](https://i.imgur.com/etU9GtN.jpg)
 

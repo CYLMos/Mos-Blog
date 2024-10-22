@@ -7,7 +7,8 @@ tags:
     - PSO
     - Gnuplot
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 這是想要在下次報告時用的東西，單純就是把以前寫的code改一改用Gnuplot顯示
 

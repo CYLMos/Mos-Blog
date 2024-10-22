@@ -6,7 +6,8 @@ tags:
     - 鍊金工房
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/Jv781Q8.png
+top_img: https://i.imgur.com/Jv781Q8.png
+cover: https://i.imgur.com/Jv781Q8.png
 ---
 ![蘇菲](https://i.imgur.com/Jv781Q8.png)
 

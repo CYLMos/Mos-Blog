@@ -6,7 +6,8 @@ tags:
     - 碧藍幻想
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/MHLZa8B.jpg
+top_img: https://i.imgur.com/MHLZa8B.jpg
+cover: https://i.imgur.com/MHLZa8B.jpg
 ---
 ![シンダラ](https://i.imgur.com/MHLZa8B.jpg)
 

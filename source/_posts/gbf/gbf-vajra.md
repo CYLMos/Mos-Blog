@@ -6,7 +6,8 @@ tags:
     - 碧藍幻想
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/IAPT7eG.png
+top_img: https://i.imgur.com/IAPT7eG.png
+cover: https://i.imgur.com/IAPT7eG.png
 ---
 ![ヴァジラ](https://i.imgur.com/IAPT7eG.png)
 

@@ -7,7 +7,8 @@ tags:
     - Pokemon Legends Arceus
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/18134j8.jpg
+top_img: https://i.imgur.com/18134j8.jpg
+cover: https://i.imgur.com/18134j8.jpg
 ---
 ![珠貝](https://i.imgur.com/18134j8.jpg)
 

@@ -8,7 +8,8 @@ tags:
     - Cloudfront
     - NodeJS
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 最近專案需要用AWS Cloudfront來做一些事情，且需要透過執行Create Invalidation來把所有的Cache清掉。
 

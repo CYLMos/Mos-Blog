@@ -8,7 +8,8 @@ tags:
     - Visual Studio 2022
     - .Net 6
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 在Build完要Deploy到Android模擬器上時，出現Need recipe file的訊息
 然後就Deploy失敗

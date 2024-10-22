@@ -6,7 +6,8 @@ tags:
     - 碧藍幻想
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/iqPqgfY.png
+top_img: https://i.imgur.com/iqPqgfY.png
+cover: https://i.imgur.com/iqPqgfY.png
 ---
 ![ニオ](https://i.imgur.com/iqPqgfY.png)
 

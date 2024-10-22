@@ -10,7 +10,8 @@ tags:
     - Linux
     - Ubuntu
 categories: 程式
-thumbnail: https://imgur.com/o7vOsdO.png
+top_img: https://imgur.com/o7vOsdO.png
+cover: https://imgur.com/o7vOsdO.png
 ---
 本篇主要記錄如何透過執行GUI應用程式(Avalonia)在WSL(Windows Subsystem for Linux)上，並能透過Visual Studio來Debug
 

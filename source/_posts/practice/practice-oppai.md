@@ -5,7 +5,8 @@ tags:
     - 練習
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/sy5rGcB.png
+top_img: https://i.imgur.com/sy5rGcB.png
+cover: https://i.imgur.com/sy5rGcB.png
 ---
 ![歐派](https://i.imgur.com/sy5rGcB.png)
 
