@@ -5,7 +5,8 @@ tags:
     - Dragalia Lost
     - Drawing
 categories: 繪圖
-thumbnail: https://i.imgur.com/WWW8kH3.jpg
+top_img: https://i.imgur.com/WWW8kH3.jpg
+cover: https://i.imgur.com/WWW8kH3.jpg
 ---
 ![伊利亞](https://i.imgur.com/WWW8kH3.jpg)
 
