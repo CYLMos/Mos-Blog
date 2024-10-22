@@ -1,0 +1,285 @@
+<!DOCTYPE html><html lang="zh-TW" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>在WSL進行.Net 6 GUI專案的開發和USB的轉接 | Mos' Blog</title><meta name="author" content="Mos Lin"><meta name="copyright" content="Mos Lin"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="本篇主要記錄如何透過執行GUI應用程式(Avalonia)在WSL(Windows Subsystem for Linux)上，並能透過Visual Studio來Debug 基本上大部分步驟都參考這篇，如果看得懂英文能直接看這篇即可 本篇除了會講上述的議題外，還會講到如何讓WSL能抓到Windows上的USB裝置 安裝Linux在WSL上首先打開Powershell，並執行以下指令 1wsl -">
+<meta property="og:type" content="article">
+<meta property="og:title" content="在WSL進行.Net 6 GUI專案的開發和USB的轉接">
+<meta property="og:url" content="https://cylmos.github.io/Mos-Blog/2022/05/21/program/program-wsl-and-usb/index.html">
+<meta property="og:site_name" content="Mos&#39; Blog">
+<meta property="og:description" content="本篇主要記錄如何透過執行GUI應用程式(Avalonia)在WSL(Windows Subsystem for Linux)上，並能透過Visual Studio來Debug 基本上大部分步驟都參考這篇，如果看得懂英文能直接看這篇即可 本篇除了會講上述的議題外，還會講到如何讓WSL能抓到Windows上的USB裝置 安裝Linux在WSL上首先打開Powershell，並執行以下指令 1wsl -">
+<meta property="og:locale" content="zh_TW">
+<meta property="og:image" content="https://cylmos.github.io/Mos-Blog/img/butterfly-icon.png">
+<meta property="article:published_time" content="2022-05-21T10:41:17.000Z">
+<meta property="article:modified_time" content="2024-10-22T04:31:57.643Z">
+<meta property="article:author" content="Mos Lin">
+<meta property="article:tag" content="程式">
+<meta property="article:tag" content=".Net 6">
+<meta property="article:tag" content=".Net">
+<meta property="article:tag" content="Linux">
+<meta property="article:tag" content="Avalonia">
+<meta property="article:tag" content="WSL">
+<meta property="article:tag" content="Ubuntu">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://cylmos.github.io/Mos-Blog/img/butterfly-icon.png"><link rel="shortcut icon" href="/Mos-Blog/img/favicon.png"><link rel="canonical" href="https://cylmos.github.io/Mos-Blog/2022/05/21/program/program-wsl-and-usb/index.html"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="stylesheet" href="/Mos-Blog/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!false && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        if (name && globalFn[key][name]) return
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/Mos-Blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  noticeOutdate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '複製成功',
+    error: '複製失敗',
+    noSupport: '瀏覽器不支援'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '剛剛',
+    min: '分鐘前',
+    hour: '小時前',
+    day: '天前',
+    month: '個月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: 'https://cdn.jsdelivr.net/npm/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '載入更多'
+  },
+  isPhotoFigcaption: false,
+  islazyload: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: '在WSL進行.Net 6 GUI專案的開發和USB的轉接',
+  isPost: true,
+  isHome: false,
+  isHighlightShrink: false,
+  isToc: true,
+  postUpdate: '2024-10-22 12:31:57'
+}</script><meta name="generator" content="Hexo 6.0.0"><link rel="alternate" href="/Mos-Blog/atom.xml" title="Mos' Blog" type="application/atom+xml">
+</head><body><div class="post" id="body-wrap"><header class="post-bg" id="page-header"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/Mos-Blog/"><span class="site-name">Mos' Blog</span></a><a class="nav-page-title" href="/Mos-Blog/"><span class="site-name">在WSL進行.Net 6 GUI專案的開發和USB的轉接</span></a></span><div id="menus"></div></nav><div id="post-info"><h1 class="post-title">在WSL進行.Net 6 GUI專案的開發和USB的轉接</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">發表於</span><time class="post-meta-date-created" datetime="2022-05-21T10:41:17.000Z" title="發表於 2022-05-21 18:41:17">2022-05-21</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新於</span><time class="post-meta-date-updated" datetime="2024-10-22T04:31:57.643Z" title="更新於 2024-10-22 12:31:57">2024-10-22</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/Mos-Blog/categories/%E7%A8%8B%E5%BC%8F/">程式</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-pv-cv" id="" data-flag-title=""><i class="far fa-eye fa-fw post-meta-icon"></i><span class="post-meta-label">瀏覽量:</span><span id="busuanzi_value_page_pv"><i class="fa-solid fa-spinner fa-spin"></i></span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><article class="post-content" id="article-container"><p>本篇主要記錄如何透過執行GUI應用程式(Avalonia)在WSL(Windows Subsystem for Linux)上，並能透過Visual Studio來Debug</p>
+<p>基本上大部分步驟都參考<a target="_blank" rel="noopener" href="https://www.codeproject.com/Articles/5330464/Running-and-Debugging-Multiplatform-NET-NET-Core-N" title="這篇">這篇</a>，如果看得懂英文能直接看這篇即可</p>
+<p>本篇除了會講上述的議題外，還會講到如何讓WSL能抓到Windows上的USB裝置</p>
+<h1 id="安裝Linux在WSL上"><a href="#安裝Linux在WSL上" class="headerlink" title="安裝Linux在WSL上"></a>安裝Linux在WSL上</h1><p>首先打開Powershell，並執行以下指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl -- install -d Ubuntu</span><br></pre></td></tr></table></figure>
+<p>如果是第一次使用WSL，應該會要求重啟電腦</p>
+<p>想查看可安裝版本可以下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --list --online</span><br></pre></td></tr></table></figure>
+
+<p>安裝其他指定版本，以安裝Debian為例</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl -- install -d Debian</span><br></pre></td></tr></table></figure>
+
+<p>安裝完成後會要求輸入使用者名稱跟密碼，要離開可以輸入<code>exit</code><br>要再次進入可以在Powershell輸入<code>wsl</code>即可</p>
+<p>進入Ubuntu之後，建議先輸入以下指令更新套件包，並安裝xterm<br>安裝xterm是為了下一個步驟測試用，非必要</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install xterm</span><br></pre></td></tr></table></figure>
+
+<h1 id="安裝VcXsvr"><a href="#安裝VcXsvr" class="headerlink" title="安裝VcXsvr"></a>安裝VcXsvr</h1><p>該程式能夠讓我們在Windows中開啟Linux的GUI應用程式<br>首先到該<a target="_blank" rel="noopener" href="https://sourceforge.net/projects/vcxsrv/" title="網頁">網頁</a>下載並安裝</p>
+<p>另外，聽說Windows 11不需要安裝該軟體，但我不確定</p>
+<p>安裝完成後，可以找找一個叫XLaunch的程式，並將其開啟<br><img src="https://i.imgur.com/RR3VRPP.png" alt="搜尋XLaunch"></p>
+<p>之後依照下面的圖片設定Xlaunch<br><img src="https://i.imgur.com/2x8EfuT.png" alt="XLaunch設定01"><br><img src="https://i.imgur.com/5r20oJK.png" alt="XLaunch設定02"><br><img src="https://i.imgur.com/150RLfN.png" alt="XLaunch設定03"></p>
+<p>在右下角檢查有出現XLaunch的Icon就是有開啟成功了</p>
+<h1 id="測試執行Xterm"><a href="#測試執行Xterm" class="headerlink" title="測試執行Xterm"></a>測試執行Xterm</h1><p>在Ubuntu上輸入以下指令開啟Xterm</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xterm</span><br></pre></td></tr></table></figure>
+
+<p>結果應該會發現出現以下Error Message</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xterm: Xt error: Can&#x27;t open display:</span><br><span class="line">xterm: DISPLAY is not set</span><br></pre></td></tr></table></figure>
+
+<p>主要是因為目前Ubuntu中沒有對DISPLAY進行設定<br>因此我們首先執行以下指令</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export DISPLAY=$(route.exe print | grep 0.0.0.0 | head -1 | awk &#x27;&#123;print $4&#125;&#x27;):0.0</span><br><span class="line">echo $DISPLAY</span><br></pre></td></tr></table></figure>
+
+<p>結果會因人而異，而我的結果是</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.2.103:0.0</span><br></pre></td></tr></table></figure>
+
+<p>接下來可以直接執行剛剛開啟xterm的指令了<br>這時就會發現xterm的程式就出現在你Windows的桌面上了<br><img src="https://i.imgur.com/o7m8tVl.png" alt="xterm顯示成功"></p>
+<h1 id="使用Avalonia進行測試並Debug"><a href="#使用Avalonia進行測試並Debug" class="headerlink" title="使用Avalonia進行測試並Debug"></a>使用Avalonia進行測試並Debug</h1><p>首先將Avalonia的Demo專案Clone下來</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/npolyak/NP.Avalonia.Demos.git</span><br></pre></td></tr></table></figure>
+
+<p>我們只會用到以下這兩個專案</p>
+<ul>
+<li>ConsoleAppForLinuxSubsystemDebuggingDemo</li>
+<li>AvaloniaAppForLinuxSubsystemDebuggingDemo</li>
+</ul>
+<p>另外我們還需要安裝.Net 6的套件在Ubuntu上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb</span><br><span class="line">sudo dpkg -i packages-microsoft-prod.deb</span><br><span class="line">sudo apt-get update</span><br><span class="line"></span><br><span class="line">sudo apt-get install apt-transport-https</span><br><span class="line">sudo apt-get install dotnet-sdk-6.0</span><br></pre></td></tr></table></figure>
+
+<h3 id="在Console專案進行Debug"><a href="#在Console專案進行Debug" class="headerlink" title="在Console專案進行Debug"></a>在Console專案進行Debug</h3><p>首先用Visual Studio打開ConsoleAppForLinuxSubsystemDebuggingDemo<br>我的VS是2022的版本</p>
+<p>打開後在執行那列可以選擇要如何執行該專案，我們要將它改成WSL，如下圖<br><img src="https://i.imgur.com/aAbtZkd.png" alt="更改為使用WSL執行"></p>
+<p>之後能將Break Point設定在任何地方進行Debug<br>以下是Break Point觸發和結果顯示<br><img src="https://i.imgur.com/Zc3W9Ew.png" alt="Break Point觸發"></p>
+<p>結果</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Yes, it is Linux!!!</span><br><span class="line">Yes, indeed Linux!!!</span><br><span class="line">RuntimeInformation.OSDescription = &#x27;Linux 5.10.16.3-microsoft-standard-WSL2 #1 SMP Fri Apr 2 22:23:49 UTC 2021&#x27;</span><br><span class="line">RuntimeInformation.RuntimeIdentifier = &#x27;ubuntu.20.04-x64&#x27;</span><br><span class="line">Environment.OSVersion = &#x27;Unix 5.10.16.3&#x27;</span><br><span class="line">The program &#x27;dotnet&#x27; has exited with code 0 (0x0).</span><br></pre></td></tr></table></figure>
+
+<h3 id="在GUI專案進行Debug"><a href="#在GUI專案進行Debug" class="headerlink" title="在GUI專案進行Debug"></a>在GUI專案進行Debug</h3><p>用Visual Studio打開AvaloniaAppForLinuxSubsystemDebuggingDemo<br>打開後如在Console專案一樣，改成用WSL執行</p>
+<p>不同的是在要在Properties&#x2F;launchSettings.json進行設定，將裡面的<code>DISPLAY</code>屬性改成前面在Ubuntu設定的DISPLAY的值</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;DISPLAY&quot;: &quot;192.168.2.103:0.0&quot;</span><br></pre></td></tr></table></figure>
+
+<p>之後執行，也一樣可以再任意地方加入Break Point來Debug，以下是執行結果<br><img src="https://i.imgur.com/ZIqT6K9.png" alt="WSL執行Avalonia GUI"></p>
+<h1 id="USB裝置接上WSL的Ubuntu"><a href="#USB裝置接上WSL的Ubuntu" class="headerlink" title="USB裝置接上WSL的Ubuntu"></a>USB裝置接上WSL的Ubuntu</h1><p>接下來要讓接在Windows上的USB裝置接到Ubuntu上<br>微軟在這部分也有<a target="_blank" rel="noopener" href="https://docs.microsoft.com/en-us/windows/wsl/connect-usb" title="文件">文件</a>能參考</p>
+<p>首先有幾點條件要達成</p>
+<ul>
+<li>作業系統要Windows 10以上</li>
+<li>處理器要x64&#x2F;86</li>
+<li>需要WSL 2的Linux發行版</li>
+<li>Linux核心版本需高於或等於5.10.60.1</li>
+</ul>
+<p>這邊不討論前兩點</p>
+<h3 id="使用WSL-2"><a href="#使用WSL-2" class="headerlink" title="使用WSL 2"></a>使用WSL 2</h3><p>在Powershell執行以下指令，可以顯示目前的Linux發行版是用WSL 1還是2</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl -l -v</span><br></pre></td></tr></table></figure>
+
+<p>我的結果如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">  NAME      STATE           VERSION</span><br><span class="line">* Ubuntu    Running         2</span><br></pre></td></tr></table></figure>
+
+<p>因為我的Ubuntu已經是使用WSL 2了，所以已經不用升級了<br>但若不是的話，需要執行以下指令來升級成WSL 2</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --set-version &lt;distro name&gt; 2</span><br></pre></td></tr></table></figure>
+
+<p>所以以我的為例子，我得要執行以下指令來升級</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --set-version Ubuntu 2</span><br></pre></td></tr></table></figure>
+
+<p>另外記得在升級前必須要將正在執行的Linux系統先關起來，指令如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --shutdown</span><br></pre></td></tr></table></figure>
+
+<h3 id="升級Linux核心版本"><a href="#升級Linux核心版本" class="headerlink" title="升級Linux核心版本"></a>升級Linux核心版本</h3><p>首先在Ubnutu下執行以下指令確認核心版本</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uname -a</span><br></pre></td></tr></table></figure>
+
+<p>我的結果如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Linux DESKTOP-S9T9GJ3 5.10.16.3-microsoft-standard-WSL2 #1 SMP Fri Apr 2 22:23:49 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux</span><br></pre></td></tr></table></figure>
+
+<p>版本是5.10.16.3，比5.10.60.1還低，因此得要升級Linux核心版本<br>可以透過以下指令達成，他會將WSL 2進行更新，一樣要先將Linux系統先關掉</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --update</span><br></pre></td></tr></table></figure>
+
+<p>這時候再去下<code>uname -a</code>，會發現Linux核心已經升級</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Linux DESKTOP-S9T9GJ3 5.10.102.1-microsoft-standard-WSL2 #1 SMP Wed Mar 2 00:30:59 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux</span><br></pre></td></tr></table></figure>
+
+<h3 id="安裝必須套件和軟體"><a href="#安裝必須套件和軟體" class="headerlink" title="安裝必須套件和軟體"></a>安裝必須套件和軟體</h3><p>在條件都達成後，我們還需要在Windows和Linux裡面都安裝必要的軟體</p>
+<p>首先是Ubuntu那邊<br>先執行以下指令安裝需要的套件</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install linux-tools-5.4.0-77-generic hwdata</span><br><span class="line">sudo update-alternatives --install /usr/local/bin/usbip usbip /usr/lib/linux-tools/5.4.0-77-generic/usbip 20</span><br></pre></td></tr></table></figure>
+
+<p>接下來是Windows的部分，到該<a target="_blank" rel="noopener" href="https://github.com/dorssel/usbipd-win/releases" title="網站">網站</a>下載並安裝usbipd-win，下載msi檔即可<br>下載或安裝過程可能會告知有風險之類的，不用管</p>
+<p>安裝完成後，在cmd執行以下指令取得目前的所有USB裝置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usbipd wsl list</span><br></pre></td></tr></table></figure>
+
+<p>我的結果如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">BUSID  VID:PID    DEVICE                                                        STATE</span><br><span class="line">1-6    0a12:0001  BRLINK Bluetooth 5.0 Device                                   Not attached</span><br><span class="line">1-9    0951:16e5  USB 輸入裝置                                                  Not attached</span><br><span class="line">1-10   1bcf:0005  USB 輸入裝置                                                  Not attached</span><br><span class="line">2-6    0480:a202  USB Mass Storage Device                                       Not attached</span><br><span class="line">3-2    08bb:2902  USB PnP Sound Device, USB 輸入裝置                            Not attached</span><br><span class="line">3-4    056a:0376  Wacom Tablet                                                  Not attached</span><br></pre></td></tr></table></figure>
+
+<p>我這邊想讓3-2這個BUS接到Ubuntu上，透過以下指令能達成</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usbipd wsl attach --busid 3-2</span><br></pre></td></tr></table></figure>
+
+<p>這時候執行<code>usbipd wsl list</code>可以看到3-2的狀態已經是Attached了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BUSID  VID:PID    DEVICE                                                        STATE</span><br><span class="line">3-2    08bb:2902  USB PnP Sound Device, USB 輸入裝置                            Attached - Ubuntu</span><br></pre></td></tr></table></figure>
+
+<p>另外如果要拔掉的話，執行以下指令來Detach</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usbipd wsl detach --busid 3-2</span><br></pre></td></tr></table></figure>
+
+<p>接下來跳到Ubuntu那邊，執行以下指令來確認是否有接上</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsusb</span><br></pre></td></tr></table></figure>
+
+<p>我的結果如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub</span><br><span class="line">Bus 001 Device 002: ID 08bb:2902 Texas Instruments PCM2902 Audio Codec  //This is my device</span><br><span class="line">Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub</span><br></pre></td></tr></table></figure>
+
+<p>第二個就是我想接上的Device</p>
+<h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>.Net 6要取得USB裝置，應該會需要用到System.IO.Ports的套件，又或是其他人已經寫好的套件</p>
+<p>另外還要注意的是，要存取USB裝置會遇到權限問題，不想搞太麻煩，方便為主的話可以到<code>/dev</code>找對應的Port，並修改權限<br>可以執行以下指令來獲得最近插入的Port來得知你插入的裝置是在哪個Port</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dmesg | grep tty</span><br></pre></td></tr></table></figure>
+
+<h1 id="後記"><a href="#後記" class="headerlink" title="後記"></a>後記</h1><p>由於工作上需要用.Net 6開發Linux的GUI應用程式和操控硬體，所以才會寫本篇做記錄</p>
+<p>目前正在研究有沒有辦法透過使用Vendor ID或Device ID來取得對應的Port，如果有結果的話會再更新</p>
+<hr>
+<p>2022&#x2F;05&#x2F;31更新<br>下面的Code主要是透過下Command的方式，透過Vendor Id和Product Id來取得對應的Device</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">using System.IO.Ports;</span><br><span class="line"></span><br><span class="line">var devices = SerialPort.GetPortNames();</span><br><span class="line">var udevParam = &quot;&#123;device&#125;&quot;;</span><br><span class="line">var udevCommand = $&quot;udevadm info --attribute-walk &#123;udevParam&#125; | grep -e idVendor -e idProduct&quot;;</span><br><span class="line"></span><br><span class="line">var vid = &quot;Your VId&quot;</span><br><span class="line">var pid = &quot;Your PId&quot;</span><br><span class="line"></span><br><span class="line">foreach (var device in devices)</span><br><span class="line">&#123;</span><br><span class="line">    string result = string.Empty;</span><br><span class="line">    using (var proc = new Process())</span><br><span class="line">    &#123;</span><br><span class="line">        proc.StartInfo.FileName = &quot;/bin/bash&quot;;</span><br><span class="line">        proc.StartInfo.Arguments = &quot;-c \&quot; &quot; + udevCommand.Replace(udevParam, device) + &quot; \&quot;&quot;;</span><br><span class="line">        proc.StartInfo.UseShellExecute = false;</span><br><span class="line">        proc.StartInfo.RedirectStandardOutput = true;</span><br><span class="line">        proc.StartInfo.RedirectStandardError = true;</span><br><span class="line">        proc.Start();</span><br><span class="line"></span><br><span class="line">        result = proc.StandardOutput.ReadToEnd();</span><br><span class="line">        proc.WaitForExit();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    var vendorIdResult = result.Contains(vid);</span><br><span class="line">    var productIdResult = result.Contains(pid);</span><br><span class="line"></span><br><span class="line">    if (vendorIdResult &amp;&amp; productIdResult)</span><br><span class="line">        return device;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">return &quot;Not found&quot;;</span><br></pre></td></tr></table></figure></article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://cylmos.github.io/Mos-Blog">Mos Lin</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章連結: </span><span class="post-copyright-info"><a href="https://cylmos.github.io/Mos-Blog/2022/05/21/program/program-wsl-and-usb/">https://cylmos.github.io/Mos-Blog/2022/05/21/program/program-wsl-and-usb/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版權聲明: </span><span class="post-copyright-info">本部落格所有文章除特別聲明外，均採用<a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 授權協議。轉載請註明來源 <a href="https://cylmos.github.io/Mos-Blog" target="_blank">Mos' Blog</a>！</span></div></div><div class="tag_share"><div class="post-meta__tag-list"><a class="post-meta__tags" href="/Mos-Blog/tags/%E7%A8%8B%E5%BC%8F/">程式</a><a class="post-meta__tags" href="/Mos-Blog/tags/Net-6/">.Net 6</a><a class="post-meta__tags" href="/Mos-Blog/tags/Net/">.Net</a><a class="post-meta__tags" href="/Mos-Blog/tags/Linux/">Linux</a><a class="post-meta__tags" href="/Mos-Blog/tags/Avalonia/">Avalonia</a><a class="post-meta__tags" href="/Mos-Blog/tags/WSL/">WSL</a><a class="post-meta__tags" href="/Mos-Blog/tags/Ubuntu/">Ubuntu</a></div><div class="post-share"><div class="social-share" data-image="/Mos-Blog/img/butterfly-icon.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="https://cdn.jsdelivr.net/npm/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/Mos-Blog/2022/04/30/program/program-worker-service-test/" title="Worker Service範例"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Worker Service範例</div></div><div class="info-2"><div class="info-item-1">工作比較閒的時候寫的，沒寫過所以拿來當個練習 功能上是每天在固定時間去證交所撈資料，然後將設定的股票的當日的資料存成Csv 在appsettings.json裡的 “AppSettings” 能夠設定像是  股票代碼 : &quot;StockNumber&quot;: [ &quot;0050&quot;, &quot;0056&quot; ]就是要撈0050跟0056這兩個股票的資料  證交所Url : 撈股票資料的Url，Query的參數用%s，理論上不要動  每天要撈資料的時間 : &quot;FetchTime&quot;: &quot;16:00:00&quot;代表每日下午四點會撈資料  CSV儲存路徑 : &quot;CsvPath&quot;: &quot;C:\\Users\User\CsvData&quot;   可以透過以下指令去Publish Worker Service 1dotnet publish -c Release -r win-x64 --no-self-contained...</div></div></div></a></nav><div class="relatedPosts"><div class="headline"><i class="fas fa-thumbs-up fa-fw"></i><span>相關推薦</span></div><div class="relatedPosts-list"><a class="pagination-related" href="/Mos-Blog/2021/11/30/program/program-maui/" title="MAUI的問題記錄"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-11-30</div><div class="info-item-2">MAUI的問題記錄</div></div><div class="info-2"><div class="info-item-1">記錄 用VS 2022開新MAUI專案關掉後再重開該專案，Project會顯示Incompatible 嘗試一堆方法後，發現在.csproj裡把SingleProject改成false後重Load就解決了(重Load後要再改成true) 希望這Bug在明年Q2正式Release前能修掉 —更新— 這問題好像是因為我不是用CS 2022 Preview導致換成Preview後解決 </div></div></div></a><a class="pagination-related" href="/Mos-Blog/2021/12/12/program/program-maui2/" title="MAUI的問題記錄2"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2021-12-12</div><div class="info-item-2">MAUI的問題記錄2</div></div><div class="info-2"><div class="info-item-1">在Build完要Deploy到Android模擬器上時，出現Need recipe file的訊息然後就Deploy失敗 我發現如果Solution Name和Project Name一樣的話，可以成功Run起來發現該問題是因為我改Project Name後就沒辦法Deploy，不過Win的部分還是正常 然後該問題目前好像還在修的樣子相關的Issue </div></div></div></a><a class="pagination-related" href="/Mos-Blog/2022/04/30/program/program-worker-service-test/" title="Worker Service範例"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2022-04-30</div><div class="info-item-2">Worker Service範例</div></div><div class="info-2"><div class="info-item-1">工作比較閒的時候寫的，沒寫過所以拿來當個練習 功能上是每天在固定時間去證交所撈資料，然後將設定的股票的當日的資料存成Csv 在appsettings.json裡的 “AppSettings” 能夠設定像是  股票代碼 : &quot;StockNumber&quot;: [ &quot;0050&quot;, &quot;0056&quot; ]就是要撈0050跟0056這兩個股票的資料  證交所Url : 撈股票資料的Url，Query的參數用%s，理論上不要動  每天要撈資料的時間 : &quot;FetchTime&quot;: &quot;16:00:00&quot;代表每日下午四點會撈資料  CSV儲存路徑 : &quot;CsvPath&quot;: &quot;C:\\Users\User\CsvData&quot;   可以透過以下指令去Publish Worker Service 1dotnet publish -c Release -r win-x64 --no-self-contained...</div></div></div></a><a class="pagination-related" href="/Mos-Blog/2018/04/08/program/program-ustar/" title="使用C++讀出tar檔案的內容"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2018-04-08</div><div class="info-item-2">使用C++讀出tar檔案的內容</div></div><div class="info-2"><div class="info-item-1">這是學校OOP的作業2要求是能正確讀出tar檔案格式的內容並將其內容顯示出來另外還需判是否是USTAR格式，非USTAR則不讀取檔案，直接跳出 USTAR相關資料 USTAR基本上每個block的大小為512bytes，所以檔案大小為512的倍數且在Header的部份的第257個bytes向後數6個bytes的內容為”ustar “ 依照上面的兩種特性就能判斷是否為USTAR格式的文件 另外，USTAR內部文件的組成大致上是Header + Content + Header2 + Contetnt2 + …..Header佔一個block，Content則視其大小決定，Content若有不足一個block，後方則補0x00 比如說Content大小為513 bytes，則第二個block的前1個byte為Content的內容，剩下511個bytes全數補0x00，所以以這例子來說，Content &gt; 512 但 &lt;&#x3D;...</div></div></div></a><a class="pagination-related" href="/Mos-Blog/2018/01/19/program/program-car-plate-app/" title="車牌辨識App"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2018-01-19</div><div class="info-item-2">車牌辨識App</div></div><div class="info-2"><div class="info-item-1">OS期末專案做的車牌辨識app使用OpenCV 3.2以及tess-two有兩種辨識模式：tess-two與KNN不要期待它的文字辨識正確率，通常會錯一兩個字tess-two我沒辦法(其實可以重新訓練data…但有點麻煩)，KNN的車牌字型樣本太少，不過以少量的樣本來說結果還可以接受 這是比較成功的車牌影像 Source Code </div></div></div></a><a class="pagination-related" href="/Mos-Blog/2019/04/10/program/program-balck-hole-algorithm/" title="黑洞演算法簡單的Demo"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-center"><div class="info-1"><div class="info-item-1"><i class="far fa-calendar-alt fa-fw"></i> 2019-04-10</div><div class="info-item-2">黑洞演算法簡單的Demo</div></div><div class="info-2"><div class="info-item-1">實驗室大咪要報的演算法 因為實作很簡單(公式還比PSO簡易…)所以就順便做了個簡單的demo 先前的PSO是用C++寫的，這次改用Java Source Code </div></div></div></a></div></div></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="/Mos-Blog/img/butterfly-icon.png" onerror="this.onerror=null;this.src='/Mos-Blog/img/friend_404.gif'" alt="avatar"/></div><div class="author-info-name">Mos Lin</div><div class="author-info-description">Mos Blog</div><div class="site-data"><a href="/Mos-Blog/archives/"><div class="headline">文章</div><div class="length-num">30</div></a><a href="/Mos-Blog/tags/"><div class="headline">標籤</div><div class="length-num">42</div></a><a href="/Mos-Blog/categories/"><div class="headline">分類</div><div class="length-num">2</div></a></div><a id="card-info-btn" target="_blank" rel="noopener" href="https://github.com/xxxxxx"><i class="fab fa-github"></i><span>Follow Me</span></a></div><div class="card-widget card-announcement"><div class="item-headline"><i class="fas fa-bullhorn fa-shake"></i><span>公告</span></div><div class="announcement_content">This is my Blog</div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目錄</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%9DLinux%E5%9C%A8WSL%E4%B8%8A"><span class="toc-number">1.</span> <span class="toc-text">安裝Linux在WSL上</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%89%E8%A3%9DVcXsvr"><span class="toc-number">2.</span> <span class="toc-text">安裝VcXsvr</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%B8%AC%E8%A9%A6%E5%9F%B7%E8%A1%8CXterm"><span class="toc-number">3.</span> <span class="toc-text">測試執行Xterm</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8Avalonia%E9%80%B2%E8%A1%8C%E6%B8%AC%E8%A9%A6%E4%B8%A6Debug"><span class="toc-number">4.</span> <span class="toc-text">使用Avalonia進行測試並Debug</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8Console%E5%B0%88%E6%A1%88%E9%80%B2%E8%A1%8CDebug"><span class="toc-number">4.0.1.</span> <span class="toc-text">在Console專案進行Debug</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%9C%A8GUI%E5%B0%88%E6%A1%88%E9%80%B2%E8%A1%8CDebug"><span class="toc-number">4.0.2.</span> <span class="toc-text">在GUI專案進行Debug</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#USB%E8%A3%9D%E7%BD%AE%E6%8E%A5%E4%B8%8AWSL%E7%9A%84Ubuntu"><span class="toc-number">5.</span> <span class="toc-text">USB裝置接上WSL的Ubuntu</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%BF%E7%94%A8WSL-2"><span class="toc-number">5.0.1.</span> <span class="toc-text">使用WSL 2</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8D%87%E7%B4%9ALinux%E6%A0%B8%E5%BF%83%E7%89%88%E6%9C%AC"><span class="toc-number">5.0.2.</span> <span class="toc-text">升級Linux核心版本</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%89%E8%A3%9D%E5%BF%85%E9%A0%88%E5%A5%97%E4%BB%B6%E5%92%8C%E8%BB%9F%E9%AB%94"><span class="toc-number">5.0.3.</span> <span class="toc-text">安裝必須套件和軟體</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%85%B6%E4%BB%96"><span class="toc-number">5.0.4.</span> <span class="toc-text">其他</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%BE%8C%E8%A8%98"><span class="toc-number">6.</span> <span class="toc-text">後記</span></a></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/Mos-Blog/2022/05/21/program/program-wsl-and-usb/" title="在WSL進行.Net 6 GUI專案的開發和USB的轉接">在WSL進行.Net 6 GUI專案的開發和USB的轉接</a><time datetime="2022-05-21T10:41:17.000Z" title="發表於 2022-05-21 18:41:17">2022-05-21</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/Mos-Blog/2022/04/30/program/program-worker-service-test/" title="Worker Service範例">Worker Service範例</a><time datetime="2022-04-30T06:35:40.000Z" title="發表於 2022-04-30 14:35:40">2022-04-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/Mos-Blog/2022/04/30/gbf/gbf-narmaya/" title="奶刀 - ナルメア">奶刀 - ナルメア</a><time datetime="2022-04-30T06:20:00.000Z" title="發表於 2022-04-30 14:20:00">2022-04-30</time></div></div><div class="aside-list-item"><a class="thumbnail" href="/Mos-Blog/2022/04/05/anime/inui-shinju/" title="戀上換裝娃娃 - 乾心壽"><img src="https://imgur.com/Q0Otp7h.jpg" onerror="this.onerror=null;this.src='/Mos-Blog/img/404.jpg'" alt="戀上換裝娃娃 - 乾心壽"/></a><div class="content"><a class="title" href="/Mos-Blog/2022/04/05/anime/inui-shinju/" title="戀上換裝娃娃 - 乾心壽">戀上換裝娃娃 - 乾心壽</a><time datetime="2022-04-05T03:52:08.000Z" title="發表於 2022-04-05 11:52:08">2022-04-05</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/Mos-Blog/2022/02/13/pokemon/pokemon-irida/" title="阿爾宙斯 - 很熱的珠貝">阿爾宙斯 - 很熱的珠貝</a><time datetime="2022-02-13T15:48:41.000Z" title="發表於 2022-02-13 23:48:41">2022-02-13</time></div></div></div></div></div></div></main><footer id="footer"><div id="footer-wrap"><div class="copyright">&copy;2019 - 2024 By Mos Lin</div><div class="framework-info"><span>框架 </span><a target="_blank" rel="noopener" href="https://hexo.io">Hexo</a><span class="footer-separator">|</span><span>主題 </span><a target="_blank" rel="noopener" href="https://github.com/jerryc127/hexo-theme-butterfly">Butterfly</a></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="閱讀模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日夜模式切換"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="單欄和雙欄切換"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="設定"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目錄"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到頂端"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/Mos-Blog/js/utils.js"></script><script src="/Mos-Blog/js/main.js"></script><div class="js-pjax"></div><script async data-pjax src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script></div></body></html>

@@ -1,0 +1,639 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Mos&#39; Blog</title>
+  
+  <subtitle>Welcome to Mos Blog</subtitle>
+  <link href="https://cylmos.github.io/Mos-Blog/atom.xml" rel="self"/>
+  
+  <link href="https://cylmos.github.io/Mos-Blog/"/>
+  <updated>2024-10-22T04:31:57.643Z</updated>
+  <id>https://cylmos.github.io/Mos-Blog/</id>
+  
+  <author>
+    <name>Mos Lin</name>
+    
+  </author>
+  
+  <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>在WSL進行.Net 6 GUI專案的開發和USB的轉接</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2022/05/21/program/program-wsl-and-usb/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2022/05/21/program/program-wsl-and-usb/</id>
+    <published>2022-05-21T10:41:17.000Z</published>
+    <updated>2024-10-22T04:31:57.643Z</updated>
+    
+    <content type="html"><![CDATA[<p>本篇主要記錄如何透過執行GUI應用程式(Avalonia)在WSL(Windows Subsystem for Linux)上，並能透過Visual Studio來Debug</p><p>基本上大部分步驟都參考<a href="https://www.codeproject.com/Articles/5330464/Running-and-Debugging-Multiplatform-NET-NET-Core-N" title="這篇">這篇</a>，如果看得懂英文能直接看這篇即可</p><p>本篇除了會講上述的議題外，還會講到如何讓WSL能抓到Windows上的USB裝置</p><h1 id="安裝Linux在WSL上"><a href="#安裝Linux在WSL上" class="headerlink" title="安裝Linux在WSL上"></a>安裝Linux在WSL上</h1><p>首先打開Powershell，並執行以下指令</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl -- install -d Ubuntu</span><br></pre></td></tr></table></figure><p>如果是第一次使用WSL，應該會要求重啟電腦</p><p>想查看可安裝版本可以下</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --list --online</span><br></pre></td></tr></table></figure><p>安裝其他指定版本，以安裝Debian為例</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl -- install -d Debian</span><br></pre></td></tr></table></figure><p>安裝完成後會要求輸入使用者名稱跟密碼，要離開可以輸入<code>exit</code><br>要再次進入可以在Powershell輸入<code>wsl</code>即可</p><p>進入Ubuntu之後，建議先輸入以下指令更新套件包，並安裝xterm<br>安裝xterm是為了下一個步驟測試用，非必要</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get update</span><br><span class="line">sudo apt-get install xterm</span><br></pre></td></tr></table></figure><h1 id="安裝VcXsvr"><a href="#安裝VcXsvr" class="headerlink" title="安裝VcXsvr"></a>安裝VcXsvr</h1><p>該程式能夠讓我們在Windows中開啟Linux的GUI應用程式<br>首先到該<a href="https://sourceforge.net/projects/vcxsrv/" title="網頁">網頁</a>下載並安裝</p><p>另外，聽說Windows 11不需要安裝該軟體，但我不確定</p><p>安裝完成後，可以找找一個叫XLaunch的程式，並將其開啟<br><img src="https://i.imgur.com/RR3VRPP.png" alt="搜尋XLaunch"></p><p>之後依照下面的圖片設定Xlaunch<br><img src="https://i.imgur.com/2x8EfuT.png" alt="XLaunch設定01"><br><img src="https://i.imgur.com/5r20oJK.png" alt="XLaunch設定02"><br><img src="https://i.imgur.com/150RLfN.png" alt="XLaunch設定03"></p><p>在右下角檢查有出現XLaunch的Icon就是有開啟成功了</p><h1 id="測試執行Xterm"><a href="#測試執行Xterm" class="headerlink" title="測試執行Xterm"></a>測試執行Xterm</h1><p>在Ubuntu上輸入以下指令開啟Xterm</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">xterm</span><br></pre></td></tr></table></figure><p>結果應該會發現出現以下Error Message</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xterm: Xt error: Can&#x27;t open display:</span><br><span class="line">xterm: DISPLAY is not set</span><br></pre></td></tr></table></figure><p>主要是因為目前Ubuntu中沒有對DISPLAY進行設定<br>因此我們首先執行以下指令</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">export DISPLAY=$(route.exe print | grep 0.0.0.0 | head -1 | awk &#x27;&#123;print $4&#125;&#x27;):0.0</span><br><span class="line">echo $DISPLAY</span><br></pre></td></tr></table></figure><p>結果會因人而異，而我的結果是</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">192.168.2.103:0.0</span><br></pre></td></tr></table></figure><p>接下來可以直接執行剛剛開啟xterm的指令了<br>這時就會發現xterm的程式就出現在你Windows的桌面上了<br><img src="https://i.imgur.com/o7m8tVl.png" alt="xterm顯示成功"></p><h1 id="使用Avalonia進行測試並Debug"><a href="#使用Avalonia進行測試並Debug" class="headerlink" title="使用Avalonia進行測試並Debug"></a>使用Avalonia進行測試並Debug</h1><p>首先將Avalonia的Demo專案Clone下來</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/npolyak/NP.Avalonia.Demos.git</span><br></pre></td></tr></table></figure><p>我們只會用到以下這兩個專案</p><ul><li>ConsoleAppForLinuxSubsystemDebuggingDemo</li><li>AvaloniaAppForLinuxSubsystemDebuggingDemo</li></ul><p>另外我們還需要安裝.Net 6的套件在Ubuntu上</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">wget https://packages.microsoft.com/config/ubuntu/20.04/packages-microsoft-prod.deb -O packages-microsoft-prod.deb</span><br><span class="line">sudo dpkg -i packages-microsoft-prod.deb</span><br><span class="line">sudo apt-get update</span><br><span class="line"></span><br><span class="line">sudo apt-get install apt-transport-https</span><br><span class="line">sudo apt-get install dotnet-sdk-6.0</span><br></pre></td></tr></table></figure><h3 id="在Console專案進行Debug"><a href="#在Console專案進行Debug" class="headerlink" title="在Console專案進行Debug"></a>在Console專案進行Debug</h3><p>首先用Visual Studio打開ConsoleAppForLinuxSubsystemDebuggingDemo<br>我的VS是2022的版本</p><p>打開後在執行那列可以選擇要如何執行該專案，我們要將它改成WSL，如下圖<br><img src="https://i.imgur.com/aAbtZkd.png" alt="更改為使用WSL執行"></p><p>之後能將Break Point設定在任何地方進行Debug<br>以下是Break Point觸發和結果顯示<br><img src="https://i.imgur.com/Zc3W9Ew.png" alt="Break Point觸發"></p><p>結果</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">Yes, it is Linux!!!</span><br><span class="line">Yes, indeed Linux!!!</span><br><span class="line">RuntimeInformation.OSDescription = &#x27;Linux 5.10.16.3-microsoft-standard-WSL2 #1 SMP Fri Apr 2 22:23:49 UTC 2021&#x27;</span><br><span class="line">RuntimeInformation.RuntimeIdentifier = &#x27;ubuntu.20.04-x64&#x27;</span><br><span class="line">Environment.OSVersion = &#x27;Unix 5.10.16.3&#x27;</span><br><span class="line">The program &#x27;dotnet&#x27; has exited with code 0 (0x0).</span><br></pre></td></tr></table></figure><h3 id="在GUI專案進行Debug"><a href="#在GUI專案進行Debug" class="headerlink" title="在GUI專案進行Debug"></a>在GUI專案進行Debug</h3><p>用Visual Studio打開AvaloniaAppForLinuxSubsystemDebuggingDemo<br>打開後如在Console專案一樣，改成用WSL執行</p><p>不同的是在要在Properties&#x2F;launchSettings.json進行設定，將裡面的<code>DISPLAY</code>屬性改成前面在Ubuntu設定的DISPLAY的值</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&quot;DISPLAY&quot;: &quot;192.168.2.103:0.0&quot;</span><br></pre></td></tr></table></figure><p>之後執行，也一樣可以再任意地方加入Break Point來Debug，以下是執行結果<br><img src="https://i.imgur.com/ZIqT6K9.png" alt="WSL執行Avalonia GUI"></p><h1 id="USB裝置接上WSL的Ubuntu"><a href="#USB裝置接上WSL的Ubuntu" class="headerlink" title="USB裝置接上WSL的Ubuntu"></a>USB裝置接上WSL的Ubuntu</h1><p>接下來要讓接在Windows上的USB裝置接到Ubuntu上<br>微軟在這部分也有<a href="https://docs.microsoft.com/en-us/windows/wsl/connect-usb" title="文件">文件</a>能參考</p><p>首先有幾點條件要達成</p><ul><li>作業系統要Windows 10以上</li><li>處理器要x64&#x2F;86</li><li>需要WSL 2的Linux發行版</li><li>Linux核心版本需高於或等於5.10.60.1</li></ul><p>這邊不討論前兩點</p><h3 id="使用WSL-2"><a href="#使用WSL-2" class="headerlink" title="使用WSL 2"></a>使用WSL 2</h3><p>在Powershell執行以下指令，可以顯示目前的Linux發行版是用WSL 1還是2</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl -l -v</span><br></pre></td></tr></table></figure><p>我的結果如下</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">  NAME      STATE           VERSION</span><br><span class="line">* Ubuntu    Running         2</span><br></pre></td></tr></table></figure><p>因為我的Ubuntu已經是使用WSL 2了，所以已經不用升級了<br>但若不是的話，需要執行以下指令來升級成WSL 2</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --set-version &lt;distro name&gt; 2</span><br></pre></td></tr></table></figure><p>所以以我的為例子，我得要執行以下指令來升級</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --set-version Ubuntu 2</span><br></pre></td></tr></table></figure><p>另外記得在升級前必須要將正在執行的Linux系統先關起來，指令如下</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --shutdown</span><br></pre></td></tr></table></figure><h3 id="升級Linux核心版本"><a href="#升級Linux核心版本" class="headerlink" title="升級Linux核心版本"></a>升級Linux核心版本</h3><p>首先在Ubnutu下執行以下指令確認核心版本</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">uname -a</span><br></pre></td></tr></table></figure><p>我的結果如下</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Linux DESKTOP-S9T9GJ3 5.10.16.3-microsoft-standard-WSL2 #1 SMP Fri Apr 2 22:23:49 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux</span><br></pre></td></tr></table></figure><p>版本是5.10.16.3，比5.10.60.1還低，因此得要升級Linux核心版本<br>可以透過以下指令達成，他會將WSL 2進行更新，一樣要先將Linux系統先關掉</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">wsl --update</span><br></pre></td></tr></table></figure><p>這時候再去下<code>uname -a</code>，會發現Linux核心已經升級</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Linux DESKTOP-S9T9GJ3 5.10.102.1-microsoft-standard-WSL2 #1 SMP Wed Mar 2 00:30:59 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux</span><br></pre></td></tr></table></figure><h3 id="安裝必須套件和軟體"><a href="#安裝必須套件和軟體" class="headerlink" title="安裝必須套件和軟體"></a>安裝必須套件和軟體</h3><p>在條件都達成後，我們還需要在Windows和Linux裡面都安裝必要的軟體</p><p>首先是Ubuntu那邊<br>先執行以下指令安裝需要的套件</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install linux-tools-5.4.0-77-generic hwdata</span><br><span class="line">sudo update-alternatives --install /usr/local/bin/usbip usbip /usr/lib/linux-tools/5.4.0-77-generic/usbip 20</span><br></pre></td></tr></table></figure><p>接下來是Windows的部分，到該<a href="https://github.com/dorssel/usbipd-win/releases" title="網站">網站</a>下載並安裝usbipd-win，下載msi檔即可<br>下載或安裝過程可能會告知有風險之類的，不用管</p><p>安裝完成後，在cmd執行以下指令取得目前的所有USB裝置</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usbipd wsl list</span><br></pre></td></tr></table></figure><p>我的結果如下</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">BUSID  VID:PID    DEVICE                                                        STATE</span><br><span class="line">1-6    0a12:0001  BRLINK Bluetooth 5.0 Device                                   Not attached</span><br><span class="line">1-9    0951:16e5  USB 輸入裝置                                                  Not attached</span><br><span class="line">1-10   1bcf:0005  USB 輸入裝置                                                  Not attached</span><br><span class="line">2-6    0480:a202  USB Mass Storage Device                                       Not attached</span><br><span class="line">3-2    08bb:2902  USB PnP Sound Device, USB 輸入裝置                            Not attached</span><br><span class="line">3-4    056a:0376  Wacom Tablet                                                  Not attached</span><br></pre></td></tr></table></figure><p>我這邊想讓3-2這個BUS接到Ubuntu上，透過以下指令能達成</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usbipd wsl attach --busid 3-2</span><br></pre></td></tr></table></figure><p>這時候執行<code>usbipd wsl list</code>可以看到3-2的狀態已經是Attached了</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">BUSID  VID:PID    DEVICE                                                        STATE</span><br><span class="line">3-2    08bb:2902  USB PnP Sound Device, USB 輸入裝置                            Attached - Ubuntu</span><br></pre></td></tr></table></figure><p>另外如果要拔掉的話，執行以下指令來Detach</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">usbipd wsl detach --busid 3-2</span><br></pre></td></tr></table></figure><p>接下來跳到Ubuntu那邊，執行以下指令來確認是否有接上</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">lsusb</span><br></pre></td></tr></table></figure><p>我的結果如下</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Bus 002 Device 001: ID 1d6b:0003 Linux Foundation 3.0 root hub</span><br><span class="line">Bus 001 Device 002: ID 08bb:2902 Texas Instruments PCM2902 Audio Codec  //This is my device</span><br><span class="line">Bus 001 Device 001: ID 1d6b:0002 Linux Foundation 2.0 root hub</span><br></pre></td></tr></table></figure><p>第二個就是我想接上的Device</p><h3 id="其他"><a href="#其他" class="headerlink" title="其他"></a>其他</h3><p>.Net 6要取得USB裝置，應該會需要用到System.IO.Ports的套件，又或是其他人已經寫好的套件</p><p>另外還要注意的是，要存取USB裝置會遇到權限問題，不想搞太麻煩，方便為主的話可以到<code>/dev</code>找對應的Port，並修改權限<br>可以執行以下指令來獲得最近插入的Port來得知你插入的裝置是在哪個Port</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dmesg | grep tty</span><br></pre></td></tr></table></figure><h1 id="後記"><a href="#後記" class="headerlink" title="後記"></a>後記</h1><p>由於工作上需要用.Net 6開發Linux的GUI應用程式和操控硬體，所以才會寫本篇做記錄</p><p>目前正在研究有沒有辦法透過使用Vendor ID或Device ID來取得對應的Port，如果有結果的話會再更新</p><hr><p>2022&#x2F;05&#x2F;31更新<br>下面的Code主要是透過下Command的方式，透過Vendor Id和Product Id來取得對應的Device</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">using System.IO.Ports;</span><br><span class="line"></span><br><span class="line">var devices = SerialPort.GetPortNames();</span><br><span class="line">var udevParam = &quot;&#123;device&#125;&quot;;</span><br><span class="line">var udevCommand = $&quot;udevadm info --attribute-walk &#123;udevParam&#125; | grep -e idVendor -e idProduct&quot;;</span><br><span class="line"></span><br><span class="line">var vid = &quot;Your VId&quot;</span><br><span class="line">var pid = &quot;Your PId&quot;</span><br><span class="line"></span><br><span class="line">foreach (var device in devices)</span><br><span class="line">&#123;</span><br><span class="line">    string result = string.Empty;</span><br><span class="line">    using (var proc = new Process())</span><br><span class="line">    &#123;</span><br><span class="line">        proc.StartInfo.FileName = &quot;/bin/bash&quot;;</span><br><span class="line">        proc.StartInfo.Arguments = &quot;-c \&quot; &quot; + udevCommand.Replace(udevParam, device) + &quot; \&quot;&quot;;</span><br><span class="line">        proc.StartInfo.UseShellExecute = false;</span><br><span class="line">        proc.StartInfo.RedirectStandardOutput = true;</span><br><span class="line">        proc.StartInfo.RedirectStandardError = true;</span><br><span class="line">        proc.Start();</span><br><span class="line"></span><br><span class="line">        result = proc.StandardOutput.ReadToEnd();</span><br><span class="line">        proc.WaitForExit();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    var vendorIdResult = result.Contains(vid);</span><br><span class="line">    var productIdResult = result.Contains(pid);</span><br><span class="line"></span><br><span class="line">    if (vendorIdResult &amp;&amp; productIdResult)</span><br><span class="line">        return device;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">return &quot;Not found&quot;;</span><br></pre></td></tr></table></figure>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;本篇主要記錄如何透過執行GUI應用程式(Avalonia)在WSL(Windows Subsystem for Linux)上，並能透過Visual Studio來Debug&lt;/p&gt;
+&lt;p&gt;基本上大部分步驟都參考&lt;a href=&quot;https://www.codeprojec</summary>
+      
+    
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%A8%8B%E5%BC%8F/"/>
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A8%8B%E5%BC%8F/"/>
+    
+    <category term=".Net 6" scheme="https://cylmos.github.io/Mos-Blog/tags/Net-6/"/>
+    
+    <category term=".Net" scheme="https://cylmos.github.io/Mos-Blog/tags/Net/"/>
+    
+    <category term="Linux" scheme="https://cylmos.github.io/Mos-Blog/tags/Linux/"/>
+    
+    <category term="Avalonia" scheme="https://cylmos.github.io/Mos-Blog/tags/Avalonia/"/>
+    
+    <category term="WSL" scheme="https://cylmos.github.io/Mos-Blog/tags/WSL/"/>
+    
+    <category term="Ubuntu" scheme="https://cylmos.github.io/Mos-Blog/tags/Ubuntu/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Worker Service範例</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2022/04/30/program/program-worker-service-test/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2022/04/30/program/program-worker-service-test/</id>
+    <published>2022-04-30T06:35:40.000Z</published>
+    <updated>2024-10-22T04:31:57.642Z</updated>
+    
+    <content type="html"><![CDATA[<p>工作比較閒的時候寫的，沒寫過所以拿來當個練習</p><p>功能上是每天在固定時間去證交所撈資料，然後將設定的股票的當日的資料存成Csv</p><p>在<code>appsettings.json</code>裡的 “AppSettings” 能夠設定像是</p><ul><li><p>股票代碼 : <code>&quot;StockNumber&quot;: [ &quot;0050&quot;, &quot;0056&quot; ]</code>就是要撈0050跟0056這兩個股票的資料</p></li><li><p>證交所Url : 撈股票資料的Url，Query的參數用<code>%s</code>，理論上不要動</p></li><li><p>每天要撈資料的時間 : <code>&quot;FetchTime&quot;: &quot;16:00:00&quot;</code>代表每日下午四點會撈資料</p></li><li><p>CSV儲存路徑 : <code>&quot;CsvPath&quot;: &quot;C:\\Users\User\CsvData&quot;</code></p></li></ul><p>可以透過以下指令去Publish Worker Service</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">dotnet publish -c Release -r win-x64 --no-self-contained -p:PublishSingleFile=true</span><br></pre></td></tr></table></figure><p>之後用PowerShell執行</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sc.exe create &quot;Your Service Name&quot; binPath=&quot;The Paht of The Service Exe file&quot;</span><br><span class="line">sc.exe start &quot;Your Service Name&quot;</span><br></pre></td></tr></table></figure><p>如果是用CMD，sc不用加exe</p><p><a href="https://github.com/CYLMos/MosWorkerService">Source Code</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;工作比較閒的時候寫的，沒寫過所以拿來當個練習&lt;/p&gt;
+&lt;p&gt;功能上是每天在固定時間去證交所撈資料，然後將設定的股票的當日的資料存成Csv&lt;/p&gt;
+&lt;p&gt;在&lt;code&gt;appsettings.json&lt;/code&gt;裡的 “AppSettings” 能夠設定像是&lt;/p&gt;
+&lt;ul</summary>
+      
+    
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%A8%8B%E5%BC%8F/"/>
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A8%8B%E5%BC%8F/"/>
+    
+    <category term="C#" scheme="https://cylmos.github.io/Mos-Blog/tags/C/"/>
+    
+    <category term="Worker Service" scheme="https://cylmos.github.io/Mos-Blog/tags/Worker-Service/"/>
+    
+    <category term=".Net" scheme="https://cylmos.github.io/Mos-Blog/tags/Net/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>奶刀 - ナルメア</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2022/04/30/gbf/gbf-narmaya/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2022/04/30/gbf/gbf-narmaya/</id>
+    <published>2022-04-30T06:20:00.000Z</published>
+    <updated>2024-10-22T04:31:57.639Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/iGTZpTz.jpg" alt="ナルメア"></p><p>天井才終於拿到OTZ<br>所以決定畫她的色圖!<br>然後髮型有點畫錯…瀏海遮住的是左眼不是右眼阿QAQ</p><p>沒霧版在P網</p><p><a href="https://www.pixiv.net/artworks/97662363">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1515238588489035779">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/iGTZpTz.jpg&quot; alt=&quot;ナルメア&quot;&gt;&lt;/p&gt;
+&lt;p&gt;天井才終於拿到OTZ&lt;br&gt;所以決定畫她的色圖!&lt;br&gt;然後髮型有點畫錯…瀏海遮住的是左眼不是右眼阿QAQ&lt;/p&gt;
+&lt;p&gt;沒霧版在P網&lt;/p&gt;
+&lt;p&gt;</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="GBF" scheme="https://cylmos.github.io/Mos-Blog/tags/GBF/"/>
+    
+    <category term="碧藍幻想" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A2%A7%E8%97%8D%E5%B9%BB%E6%83%B3/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>戀上換裝娃娃 - 乾心壽</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2022/04/05/anime/inui-shinju/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2022/04/05/anime/inui-shinju/</id>
+    <published>2022-04-05T03:52:08.000Z</published>
+    <updated>2024-10-22T05:07:37.163Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://imgur.com/Q0Otp7h.jpg" alt="心壽"></p><p>雖然以現實狀況我應該仰視而非俯視的視角…</p><p><a href="https://www.pixiv.net/artworks/97329572">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1509845734757400584">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://imgur.com/Q0Otp7h.jpg&quot; alt=&quot;心壽&quot;&gt;&lt;/p&gt;
+&lt;p&gt;雖然以現實狀況我應該仰視而非俯視的視角…&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/97329572&quot;&gt;P</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="Anime" scheme="https://cylmos.github.io/Mos-Blog/tags/Anime/"/>
+    
+    <category term="戀上換裝娃娃" scheme="https://cylmos.github.io/Mos-Blog/tags/%E6%88%80%E4%B8%8A%E6%8F%9B%E8%A3%9D%E5%A8%83%E5%A8%83/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>阿爾宙斯 - 很熱的珠貝</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2022/02/13/pokemon/pokemon-irida/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2022/02/13/pokemon/pokemon-irida/</id>
+    <published>2022-02-13T15:48:41.000Z</published>
+    <updated>2024-10-22T04:31:57.640Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/18134j8.jpg" alt="珠貝"></p><p>不小心把胸部加大了</p><p><a href="https://www.pixiv.net/artworks/96224898">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1492870990015066113">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/18134j8.jpg&quot; alt=&quot;珠貝&quot;&gt;&lt;/p&gt;
+&lt;p&gt;不小心把胸部加大了&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/96224898&quot;&gt;PIXIV&lt;/a&gt;&lt;</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="寶可夢" scheme="https://cylmos.github.io/Mos-Blog/tags/%E5%AF%B6%E5%8F%AF%E5%A4%A2/"/>
+    
+    <category term="Pokemon" scheme="https://cylmos.github.io/Mos-Blog/tags/Pokemon/"/>
+    
+    <category term="Pokemon Legends Arceus" scheme="https://cylmos.github.io/Mos-Blog/tags/Pokemon-Legends-Arceus/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>阿爾宙斯 - 瓜娜</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2022/02/05/pokemon/pokemon-palina/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2022/02/05/pokemon/pokemon-palina/</id>
+    <published>2022-02-05T13:21:24.000Z</published>
+    <updated>2024-10-22T04:31:57.640Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/JMtIkKb.jpg" alt="瓜娜"></p><p>第一次看到那超大的護目鏡就想這樣玩了</p><p><a href="https://www.pixiv.net/artworks/96014970">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1489824022040702976">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/JMtIkKb.jpg&quot; alt=&quot;瓜娜&quot;&gt;&lt;/p&gt;
+&lt;p&gt;第一次看到那超大的護目鏡就想這樣玩了&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/96014970&quot;&gt;P</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="寶可夢" scheme="https://cylmos.github.io/Mos-Blog/tags/%E5%AF%B6%E5%8F%AF%E5%A4%A2/"/>
+    
+    <category term="Pokemon" scheme="https://cylmos.github.io/Mos-Blog/tags/Pokemon/"/>
+    
+    <category term="Pokemon Legends Arceus" scheme="https://cylmos.github.io/Mos-Blog/tags/Pokemon-Legends-Arceus/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>闇龍 - フェディエル</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2022/01/10/gbf/gbf-fediel/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2022/01/10/gbf/gbf-fediel/</id>
+    <published>2022-01-10T05:16:48.000Z</published>
+    <updated>2024-10-22T04:31:57.638Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/JTWALHZ.jpg" alt="フェディエル"></p><p>胸部的Size好像畫錯了…</p><p><a href="https://www.pixiv.net/artworks/95391572">PIXIV</a><br>[TWITTER](<a href="https://twitter.com/cylin910021/status/147980764567897702">https://twitter.com/cylin910021/status/147980764567897702</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/JTWALHZ.jpg&quot; alt=&quot;フェディエル&quot;&gt;&lt;/p&gt;
+&lt;p&gt;胸部的Size好像畫錯了…&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/95391572&quot;&gt;PI</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="GBF" scheme="https://cylmos.github.io/Mos-Blog/tags/GBF/"/>
+    
+    <category term="碧藍幻想" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A2%A7%E8%97%8D%E5%B9%BB%E6%83%B3/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>練習 - 歐派</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/12/24/practice/practice-oppai/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/12/24/practice/practice-oppai/</id>
+    <published>2021-12-23T23:51:52.000Z</published>
+    <updated>2024-10-22T04:31:57.641Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/sy5rGcB.png" alt="歐派"></p><p>練習上個色</p><p><a href="https://www.pixiv.net/artworks/94966503">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1474048782065336323">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/sy5rGcB.png&quot; alt=&quot;歐派&quot;&gt;&lt;/p&gt;
+&lt;p&gt;練習上個色&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/94966503&quot;&gt;PIXIV&lt;/a&gt;&lt;br&gt;&lt;</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="練習" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%B7%B4%E7%BF%92/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>記錄個Cloudfront和Electron相關的問題</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/12/22/program/program-cloudfront-and-electron/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/12/22/program/program-cloudfront-and-electron/</id>
+    <published>2021-12-22T07:46:06.000Z</published>
+    <updated>2024-10-22T04:31:57.641Z</updated>
+    
+    <content type="html"><![CDATA[<p>最近專案需要用AWS Cloudfront來做一些事情，且需要透過執行Create Invalidation來把所有的Cache清掉。</p><p>但是發現Client Side (Electron)不管怎樣都有機會拿到舊的資料，然而Pipeline運作正常，呼叫Create Invalidation也有成功，S3 Bucket裡的內容也有更新，而且Electron裡也會固定呼叫Clear Cache的Function，過了很久一直搞不清楚原因。</p><p>後來發現問題出在哪了，但感覺有點蠢</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">app.commandLine.appendSwitch (&quot;disable-http-cache&quot;);</span><br></pre></td></tr></table></figure><p>在Electron加了上面這行，把Http Cache Disable即可<br>看來在Electron呼叫session.clearStorageData()似乎也不會把所有Cache清掉</p><p>—-更新—-</p><p>後來改成下面的寫法:</p><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">session.clearCache(() =&gt; &#123;</span><br><span class="line">    session.clearStorageData();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure><p>測試幾次New Build，Electron在經過Reload後都有拿到最新的資料<br>看來應該是沒有問題了</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;最近專案需要用AWS Cloudfront來做一些事情，且需要透過執行Create Invalidation來把所有的Cache清掉。&lt;/p&gt;
+&lt;p&gt;但是發現Client Side (Electron)不管怎樣都有機會拿到舊的資料，然而Pipeline運作正常，呼叫Crea</summary>
+      
+    
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%A8%8B%E5%BC%8F/"/>
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A8%8B%E5%BC%8F/"/>
+    
+    <category term="Electron" scheme="https://cylmos.github.io/Mos-Blog/tags/Electron/"/>
+    
+    <category term="AWS" scheme="https://cylmos.github.io/Mos-Blog/tags/AWS/"/>
+    
+    <category term="Cloudfront" scheme="https://cylmos.github.io/Mos-Blog/tags/Cloudfront/"/>
+    
+    <category term="NodeJS" scheme="https://cylmos.github.io/Mos-Blog/tags/NodeJS/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>虎神將 - シンダラ</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/12/20/gbf/gbf-cidala/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/12/20/gbf/gbf-cidala/</id>
+    <published>2021-12-20T06:08:53.000Z</published>
+    <updated>2024-10-22T04:31:57.638Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/MHLZa8B.jpg" alt="シンダラ"></p><p>第一次畫兩個人以上的圖<br>結果人看起來沒太崩，崩的是中間的老虎QAQ<br>希望新年池能抽到</p><p><a href="https://www.pixiv.net/artworks/94845596">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1472009947013853185">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/MHLZa8B.jpg&quot; alt=&quot;シンダラ&quot;&gt;&lt;/p&gt;
+&lt;p&gt;第一次畫兩個人以上的圖&lt;br&gt;結果人看起來沒太崩，崩的是中間的老虎QAQ&lt;br&gt;希望新年池能抽到&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://ww</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="GBF" scheme="https://cylmos.github.io/Mos-Blog/tags/GBF/"/>
+    
+    <category term="碧藍幻想" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A2%A7%E8%97%8D%E5%B9%BB%E6%83%B3/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MAUI的問題記錄2</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/12/12/program/program-maui2/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/12/12/program/program-maui2/</id>
+    <published>2021-12-12T13:30:46.000Z</published>
+    <updated>2024-10-22T04:31:57.642Z</updated>
+    
+    <content type="html"><![CDATA[<p>在Build完要Deploy到Android模擬器上時，出現Need recipe file的訊息<br>然後就Deploy失敗</p><p>我發現如果Solution Name和Project Name一樣的話，可以成功Run起來<br>發現該問題是因為我改Project Name後就沒辦法Deploy，不過Win的部分還是正常</p><p>然後該問題目前好像還在修的樣子<br><a href="https://github.com/dotnet/maui/issues/2942">相關的Issue</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;在Build完要Deploy到Android模擬器上時，出現Need recipe file的訊息&lt;br&gt;然後就Deploy失敗&lt;/p&gt;
+&lt;p&gt;我發現如果Solution Name和Project Name一樣的話，可以成功Run起來&lt;br&gt;發現該問題是因為我改Projec</summary>
+      
+    
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%A8%8B%E5%BC%8F/"/>
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A8%8B%E5%BC%8F/"/>
+    
+    <category term="C#" scheme="https://cylmos.github.io/Mos-Blog/tags/C/"/>
+    
+    <category term="MAUI" scheme="https://cylmos.github.io/Mos-Blog/tags/MAUI/"/>
+    
+    <category term="Visual Studio 2022" scheme="https://cylmos.github.io/Mos-Blog/tags/Visual-Studio-2022/"/>
+    
+    <category term=".Net 6" scheme="https://cylmos.github.io/Mos-Blog/tags/Net-6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>伊利亞 (星龍季Ver.)</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/12/12/dragalialost/dragalialost-ilia/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/12/12/dragalialost/dragalialost-ilia/</id>
+    <published>2021-12-12T05:05:33.000Z</published>
+    <updated>2024-10-22T04:31:57.638Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/WWW8kH3.jpg" alt="伊利亞"></p><p>All in…<br>但什麼都沒有QAQ</p><p><a href="https://www.pixiv.net/artworks/94716703">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1469676030189518848">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/WWW8kH3.jpg&quot; alt=&quot;伊利亞&quot;&gt;&lt;/p&gt;
+&lt;p&gt;All in…&lt;br&gt;但什麼都沒有QAQ&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/94716703</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="Dragalia Lost" scheme="https://cylmos.github.io/Mos-Blog/tags/Dragalia-Lost/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ニオ (萬聖節Skin)</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/12/05/gbf/gbf-niyon/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/12/05/gbf/gbf-niyon/</id>
+    <published>2021-12-05T02:50:43.000Z</published>
+    <updated>2024-10-22T04:31:57.639Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/iqPqgfY.png" alt="ニオ"></p><p>第一位加入和第一位終解的十天眾<br>但是自從抽到猴子後幾乎都沒上場…<br>想終終解但那素材實在很不想農阿…</p><p><a href="https://www.pixiv.net/artworks/94542635">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1466770805048885249">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/iqPqgfY.png&quot; alt=&quot;ニオ&quot;&gt;&lt;/p&gt;
+&lt;p&gt;第一位加入和第一位終解的十天眾&lt;br&gt;但是自從抽到猴子後幾乎都沒上場…&lt;br&gt;想終終解但那素材實在很不想農阿…&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="GBF" scheme="https://cylmos.github.io/Mos-Blog/tags/GBF/"/>
+    
+    <category term="碧藍幻想" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A2%A7%E8%97%8D%E5%B9%BB%E6%83%B3/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>MAUI的問題記錄</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/11/30/program/program-maui/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/11/30/program/program-maui/</id>
+    <published>2021-11-30T00:21:20.000Z</published>
+    <updated>2024-10-22T04:31:57.642Z</updated>
+    
+    <content type="html"><![CDATA[<p>記錄</p><p>用VS 2022開新MAUI專案<br>關掉後再重開該專案，Project會顯示Incompatible</p><p>嘗試一堆方法後，發現在.csproj裡把SingleProject改成false後重Load就解決了(重Load後要再改成true)</p><p>希望這Bug在明年Q2正式Release前能修掉</p><p>—更新—</p><p>這問題好像是因為我不是用CS 2022 Preview導致<br>換成Preview後解決</p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;記錄&lt;/p&gt;
+&lt;p&gt;用VS 2022開新MAUI專案&lt;br&gt;關掉後再重開該專案，Project會顯示Incompatible&lt;/p&gt;
+&lt;p&gt;嘗試一堆方法後，發現在.csproj裡把SingleProject改成false後重Load就解決了(重Load後要再改成true)&lt;</summary>
+      
+    
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%A8%8B%E5%BC%8F/"/>
+    
+    
+    <category term="程式" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A8%8B%E5%BC%8F/"/>
+    
+    <category term="C#" scheme="https://cylmos.github.io/Mos-Blog/tags/C/"/>
+    
+    <category term="MAUI" scheme="https://cylmos.github.io/Mos-Blog/tags/MAUI/"/>
+    
+    <category term="Visual Studio 2022" scheme="https://cylmos.github.io/Mos-Blog/tags/Visual-Studio-2022/"/>
+    
+    <category term=".Net 6" scheme="https://cylmos.github.io/Mos-Blog/tags/Net-6/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>珍珠鑽石 - 小光</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/11/29/pokemon/pokemon-dawn/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/11/29/pokemon/pokemon-dawn/</id>
+    <published>2021-11-28T23:53:43.000Z</published>
+    <updated>2024-10-22T04:31:57.640Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/bP0Efhu.jpg" alt="小光"></p><p>破玩鑽石一周目~!</p><p><a href="https://www.pixiv.net/artworks/94412874">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1464577875345309696">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/bP0Efhu.jpg&quot; alt=&quot;小光&quot;&gt;&lt;/p&gt;
+&lt;p&gt;破玩鑽石一周目~!&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/94412874&quot;&gt;PIXIV&lt;/a&gt;&lt;</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="寶可夢" scheme="https://cylmos.github.io/Mos-Blog/tags/%E5%AF%B6%E5%8F%AF%E5%A4%A2/"/>
+    
+    <category term="Pokemon" scheme="https://cylmos.github.io/Mos-Blog/tags/Pokemon/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>リッチ</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/11/10/gbf/gbf-lich/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/11/10/gbf/gbf-lich/</id>
+    <published>2021-11-10T10:57:17.000Z</published>
+    <updated>2024-10-22T04:31:57.638Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/MzSoR0O.jpg" alt="リッチ"></p><p>之前拆井抽到的<br>省略掉一堆裝飾，結果不小心連黑眼圈都省了…</p><p><a href="https://www.pixiv.net/artworks/94033711">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1458121493888438275">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/MzSoR0O.jpg&quot; alt=&quot;リッチ&quot;&gt;&lt;/p&gt;
+&lt;p&gt;之前拆井抽到的&lt;br&gt;省略掉一堆裝飾，結果不小心連黑眼圈都省了…&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artwo</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="GBF" scheme="https://cylmos.github.io/Mos-Blog/tags/GBF/"/>
+    
+    <category term="碧藍幻想" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A2%A7%E8%97%8D%E5%B9%BB%E6%83%B3/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Dragalia Lost - サンダルフォン</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/10/24/dragalialost/dragalialost-sandalphon/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/10/24/dragalialost/dragalialost-sandalphon/</id>
+    <published>2021-10-24T05:32:00.000Z</published>
+    <updated>2024-10-22T04:31:57.638Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/h7C71vK.png" alt="サンダルフォン"></p><p>畫個聖德芬<br>不知道會啥這角色打到我性癖</p><p><a href="https://www.pixiv.net/artworks/93650598">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1452146030418415616">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/h7C71vK.png&quot; alt=&quot;サンダルフォン&quot;&gt;&lt;/p&gt;
+&lt;p&gt;畫個聖德芬&lt;br&gt;不知道會啥這角色打到我性癖&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/93</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="Dragalia Lost" scheme="https://cylmos.github.io/Mos-Blog/tags/Dragalia-Lost/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>蘇菲的鍊金工房2 - 蘇菲</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/10/09/atelier/atelier-sophie2/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/10/09/atelier/atelier-sophie2/</id>
+    <published>2021-10-09T10:14:00.000Z</published>
+    <updated>2024-10-22T04:31:57.637Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/Jv781Q8.png" alt="蘇菲"></p><p>蘇菲2要發售了，開心~!<br>然後模組的歐派好像升級了?</p><p><a href="https://www.pixiv.net/artworks/93328336">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1446781122038304768">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/Jv781Q8.png&quot; alt=&quot;蘇菲&quot;&gt;&lt;/p&gt;
+&lt;p&gt;蘇菲2要發售了，開心~!&lt;br&gt;然後模組的歐派好像升級了?&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artworks/</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Atelier" scheme="https://cylmos.github.io/Mos-Blog/tags/Atelier/"/>
+    
+    <category term="鍊金工房" scheme="https://cylmos.github.io/Mos-Blog/tags/%E9%8D%8A%E9%87%91%E5%B7%A5%E6%88%BF/"/>
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>狗神將 - ヴァジラ</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/02/25/gbf/gbf-vajra/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/02/25/gbf/gbf-vajra/</id>
+    <published>2021-02-25T04:34:24.000Z</published>
+    <updated>2024-10-22T04:31:57.639Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/IAPT7eG.png" alt="ヴァジラ"></p><p>上個月狗終解前就開始畫<br>然後前幾天才畫好…<br>但畫這麼久感覺還是很崩…</p><p>然後姑且畫了差分</p><p><a href="https://www.pixiv.net/artworks/87898479">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1362777770657411076">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/IAPT7eG.png&quot; alt=&quot;ヴァジラ&quot;&gt;&lt;/p&gt;
+&lt;p&gt;上個月狗終解前就開始畫&lt;br&gt;然後前幾天才畫好…&lt;br&gt;但畫這麼久感覺還是很崩…&lt;/p&gt;
+&lt;p&gt;然後姑且畫了差分&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;ht</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="GBF" scheme="https://cylmos.github.io/Mos-Blog/tags/GBF/"/>
+    
+    <category term="碧藍幻想" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A2%A7%E8%97%8D%E5%B9%BB%E6%83%B3/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ビカラ (全空最弱 Ver.)</title>
+    <link href="https://cylmos.github.io/Mos-Blog/2021/01/15/gbf/gbf-vikala/"/>
+    <id>https://cylmos.github.io/Mos-Blog/2021/01/15/gbf/gbf-vikala/</id>
+    <published>2021-01-15T02:00:45.000Z</published>
+    <updated>2024-10-22T04:31:57.639Z</updated>
+    
+    <content type="html"><![CDATA[<p><img src="https://i.imgur.com/Kj4dWMu.png" alt="ビカラ"></p><p>比貓還要弱的鼠神將<br>然而明明是R角評分卻是R角裡最高的ww</p><p><a href="https://www.pixiv.net/artworks/87053745">PIXIV</a><br><a href="https://twitter.com/cylin910021/status/1349735343516385291">TWITTER</a></p>]]></content>
+    
+    
+      
+      
+    <summary type="html">&lt;p&gt;&lt;img src=&quot;https://i.imgur.com/Kj4dWMu.png&quot; alt=&quot;ビカラ&quot;&gt;&lt;/p&gt;
+&lt;p&gt;比貓還要弱的鼠神將&lt;br&gt;然而明明是R角評分卻是R角裡最高的ww&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://www.pixiv.net/artwo</summary>
+      
+    
+    
+    
+    <category term="繪圖" scheme="https://cylmos.github.io/Mos-Blog/categories/%E7%B9%AA%E5%9C%96/"/>
+    
+    
+    <category term="Drawing" scheme="https://cylmos.github.io/Mos-Blog/tags/Drawing/"/>
+    
+    <category term="GBF" scheme="https://cylmos.github.io/Mos-Blog/tags/GBF/"/>
+    
+    <category term="碧藍幻想" scheme="https://cylmos.github.io/Mos-Blog/tags/%E7%A2%A7%E8%97%8D%E5%B9%BB%E6%83%B3/"/>
+    
+  </entry>
+  
+</feed>
