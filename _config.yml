@@ -107,9 +107,3 @@ deploy:
   repo: https://github.com/CYLMos/Mos-Blog.git # https://github.com/[你的 GitHub 帳號]/[你的 GitHub 帳號].github.io.git
   branch: master
   message: 'ithelpt'
-  
-# A simple 404 page
-error_404:
-  enable: true
-  subtitle: '頁面沒有找到'
-  background:
