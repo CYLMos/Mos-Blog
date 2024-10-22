@@ -1,5 +1,5 @@
 ---
-title: tags
+title: Tags
 date: 2024-10-22 12:56:32
 type: 'tags'
 orderby: length

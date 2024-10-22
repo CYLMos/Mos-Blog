@@ -1,5 +1,5 @@
 ---
-title: categories
+title: Categories
 date: 2024-10-22 12:59:15
 type: 'categories'
 ---
