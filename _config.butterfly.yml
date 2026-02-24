@@ -342,7 +342,7 @@ aside:
     # 是否顯示公告卡片
     enable: true
     # 公告內容
-    content: 懶~廢~
+    content: 好想整天耍廢
   card_recent_post:
     # 是否顯示最近文章卡片
     enable: true
